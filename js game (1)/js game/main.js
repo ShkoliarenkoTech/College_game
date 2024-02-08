@@ -2,6 +2,7 @@ const $btn = document.getElementById('btn-kick')
 const btn_super = document.getElementById('btn-super-kick')
 const logsDiv = document.querySelector('#logs')
 
+var counter = 0
 
 function renderHP() {
   this.renderHPLife()
@@ -33,9 +34,7 @@ function renderProgressbarHP() {
   this.elProgressbar.style.width = this.damageHP + '&'
 }
 
-function random(num) {
-  return Math.ceil(Math.random() * num)
-}
+const random = (num) => Math.ceil(Math.random() * num)
 
 const character = {
   name: 'Pikachu',
@@ -61,26 +60,44 @@ const enemy = {
   renderProgressbarHP,
 }
 
-$btn.addEventListener('click', function () {
-  console.log('Kick')
-  character.changeHP(random(20))
-  enemy.changeHP(random(20))
-})
-
-btn_super.addEventListener('click', function () {
-  console.log('Super Kick')
-  enemy.changeHP(47)
-})
-
-function init() {
-  console.log('Start Game!')
-}
-
-
-function generateLog(firstPerson, secondPerson) {
+const countBtnClicks = (count, element) => {
+    const btnText = element.innerText
+    console.log('Нажата кнопка: ', btnText)
+    let clicks = 0
+    return function () {
+      clicks++
+      count--
+      if (count === 0) {
+        alert('У этой кнопки закончились нажатия!')
+        element.disabled = true
+      }
+      console.log(`Осталось нажатий: ${count} (кнопка "${btnText}")`)
+      console.log(`Сделано нажатий: ${clicks} (кнопка "${btnText}")`)
+    }
+  }
+  
+  const btnCount = countBtnClicks(5, $btn)
+  const btnSuperCount = countBtnClicks(3, btn_super)
+  
+  $btn.addEventListener('click', () => {
+    btnCount()
+    character.changeHP(random(20))
+    enemy.changeHP(random(20))
+  })
+  
+  btn_super.addEventListener('click', () => {
+    btnSuperCount()
+    enemy.changeHP(47)
+  })
+  
+  const init = () => {
+    console.log('Start Game!')
+  }
+  
+  const generateLog = (firstPerson, secondPerson) => {
     const hpLeft = firstPerson.damageHP + '/' + firstPerson.defaultHP
     const damage = firstPerson.defaultHP - firstPerson.damageHP
-  
+    
     const logs = [
       `${firstPerson.name} вспомнил что-то важное, но неожиданно ${secondPerson.name}, не помня себя от испуга, ударил в предплечье врага. -${damage}, [${hpLeft}]`,
       `${firstPerson.name} поперхнулся, и за это ${secondPerson.name} с испугу приложил прямой удар коленом в лоб врага. -${damage}, [${hpLeft}]`,
@@ -93,14 +110,10 @@ function generateLog(firstPerson, secondPerson) {
       `${firstPerson.name} расстроился, как вдруг, неожиданно ${secondPerson.name} случайно влепил стопой в живот соперника. -${damage}, [${hpLeft}]`,
       `${firstPerson.name} пытался что-то сказать, но вдруг, неожиданно ${secondPerson.name} со скуки, разбил бровь сопернику. -${damage}, [${hpLeft}]`,
     ]
-  
     const log = logs[random(logs.length) - 1]
     const p = document.createElement('p')
     p.innerText = log
-  
     logsDiv.insertBefore(p, logsDiv.children[0])
-  
     return log
   }
-
   init()
